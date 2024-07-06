@@ -1,0 +1,75 @@
+            - name: Dart Analyzer SARIF
+  # You may pin to the exact commit or the version.
+  # uses: advanced-security/dart-analyzer-sarif@a6363fdc4614c899321a2373d40b9d1f9809793d
+  uses: advanced-security/dart-analyzer-sarif@v1
+  with:
+    # Path to the root of the source code
+    sourceroot: # optional, default is $GITHUB_WORKSPACE
+    # Path to the `dart analyze` text output
+    input: 
+    # Path to the output SARIF file
+    output: # optional
+                      - name: dart-package
+  # You may pin to the exact commit or the version.
+  # uses: nikosportolos/dart_package@b8506ff965fc31a92325eb17993d9fdab0efc04c
+  uses: nikosportolos/dart_package@v0.2.1
+  with:
+    # Specify the working directory.
+    working_directory: # optional, default is .
+    # Specify which SDK to use (dart, flutter).
+    sdk: # optional, default is dart
+    # Specify the Dart SDK version.
+    dart_sdk: # optional, default is 3.1.4
+    # Specify the Flutter SDK version.
+    flutter_sdk: # optional, default is 3.13.8
+    # Specify the directories to run dart analyze.
+    analyze_directories: # optional, default is lib test
+    # The line length to use with dart format.
+    line_length: # optional, default is 120
+    # Controls the number of test suites that runs concurrently, meaning that multiple tests in independent suites or platforms can run at the same time.
+    concurrency: # optional, default is 4
+    # Flag that defines whether to skip tests.
+    skip_tests: # optional, default is false
+    # Flag that defines whether to run tests with coverage.
+    coverage: # optional, default is false
+    # Flag that defines whether to upload coverage reports to Codecov. Requires the codecov_token.
+    codecov: # optional, default is false
+    # The token that will be used to upload coverage reports to Codecov. Requires the codecov flag to be set to true.
+    codecov_token: # optional, default is 
+    # Flag that defines whether to publish the package on pub.dev.
+    publish: # optional, default is false
+    # The token that will be used to publish the package to pub.dev.
+    pubdev_token: # optional, default is 
+    # The exit code will indicate if (max - granted points) <= threshold.
+    pana_threshold: # optional, default is 19
+            - name: Dart Analyzer SARIF
+  # You may pin to the exact commit or the version.
+  # uses: advanced-security/dart-analyzer-sarif@a6363fdc4614c899321a2373d40b9d1f9809793d
+  uses: advanced-security/dart-analyzer-sarif@v1
+  with:
+    # Path to the root of the source code
+    sourceroot: # optional, default is $GITHUB_WORKSPACE
+    # Path to the `dart analyze` text output
+    input: 
+    # Path to the output SARIF file
+    output: # optional
+            - name: Dart Test annotations
+  # You may pin to the exact commit or the version.
+  # uses: rodrigost23/dart-test-annotations@8bd35ee4ac43a47c835cd8a02dc64f429af08bef
+  uses: rodrigost23/dart-test-annotations@v1.0
+  with:
+    # Path to the JSON file
+    path: 
+            - name: pub.dev-cd
+  # You may pin to the exact commit or the version.
+  # uses: RatakondalaArun/pub.dev-cd@784b9b03cd5afa197911141eca19a05e305c9b20
+  uses: RatakondalaArun/pub.dev-cd@v1.0.0
+  with:
+    # Creditionals for pub.dev site to deploy the package.
+    creditionals: 
+    # Path to the package.
+    package_path: # optional, default is .
+          
+          
+          
+          
