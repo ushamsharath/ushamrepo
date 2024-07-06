@@ -1,13 +1,20 @@
+
 import 'package:flutter/material.dart';
+//import 'package:bloc_flutter/features/home/ui/home.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:hemlife/screens/Donor.dart';
-import 'package:hemlife/screens/Hospital.dart';
 import 'package:hemlife/screens/bloodbank.dart';
-import 'package:hemlife/screens/management.dart';
+import 'package:hemlife/screens/donor2.dart';
+import 'package:hemlife/screens/sigin2.dart';
 import 'package:hemlife/screens/splashscreen.dart';
 import 'package:hemlife/signin.dart';
+import 'firebase_options.dart';
 
-
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -16,14 +23,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hemlife',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF49B6F3)),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen()
-    );
+    return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        /*theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal),
+        ),*/
+        home: SplashScreen ());
   }
 }
-

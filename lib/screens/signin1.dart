@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hemlife/screens/Hospital.dart';
-// Ensure this path is correct
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hemlife/screens/verification.dart';
+import 'package:hemlife/screens/verificationhospital.dart';
 
 class Hospital extends StatefulWidget {
-  const Hospital({super.key, required this.page});  
+  const Hospital({super.key, required this.page});
   final String page;
 
   @override
@@ -15,9 +17,76 @@ class _HospitalState extends State<Hospital> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _uniqueCodeController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final bool _isLoading = false;
+  bool _isLoading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  void _signup() async {
+    String name = _nameController.text.trim();
+    String phone = _phoneController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (name.isEmpty || phone.isEmpty || email.isEmpty || password.isEmpty) {
+      _showSnackBar('Please fill all the fields', Colors.red);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      User? user = userCredential.user;
+      if (user != null) {
+        await _firestore.collection('Hospitals').doc(user.uid).set({
+          'name': name,
+          'phone': phone,
+          'email': email,
+          'uid': user.uid,
+        });
+
+        await user.sendEmailVerification();
+        _showSnackBar('Signup Successful, please verify your email.', Colors.green);
+
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OTPVerification(
+              email: email,
+              name: name,
+              address: '',
+              mobile: phone,
+              uid: user.uid,
+            ),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      _showSnackBar('Signup Failed: ${e.message}', Colors.red);
+    } catch (e) {
+      _showSnackBar('An error occurred: ${e.toString()}', Colors.red);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: color,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   @override
   void dispose() {
@@ -25,7 +94,6 @@ class _HospitalState extends State<Hospital> {
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _uniqueCodeController.dispose();
     super.dispose();
   }
 
@@ -80,18 +148,6 @@ class _HospitalState extends State<Hospital> {
                       ),
                       const SizedBox(height: 20.0),
                       _buildTextFormField(
-                        controller: _uniqueCodeController,
-                        label: 'Unique Code',
-                        icon: Icons.code,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the unique code';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20.0),
-                      _buildTextFormField(
                         controller: _phoneController,
                         label: 'Mobile Number',
                         icon: Icons.phone,
@@ -131,12 +187,7 @@ class _HospitalState extends State<Hospital> {
                       GestureDetector(
                         onTap: () {
                           if (_formKey.currentState!.validate()) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const BloodRequestApp(page: 'login'),
-                              ),
-                            );
+                            _signup();
                           }
                         },
                         child: Container(

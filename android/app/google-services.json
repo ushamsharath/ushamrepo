@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "777669008164",
+    "project_id": "hemlife-c6624",
+    "storage_bucket": "hemlife-c6624.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777669008164:android:dcd9266e611790580671b1",
+        "android_client_info": {
+          "package_name": "com.example.hemlife"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3R4XbjVYremtN88hLX9aP0b64rreMgbw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
