@@ -1,5 +1,7 @@
  import 'package:flutter/material.dart';
+import 'package:hemlife/screens/bloodbanklogin.dart';
 import 'package:hemlife/screens/sigin2.dart';
+import 'package:hemlife/screens/signin1.dart';
 import 'package:hemlife/signin.dart';
 import 'package:lottie/lottie.dart';
 // Import the GetOTPScreen
@@ -47,7 +49,7 @@ class WelcomeScreenB extends StatelessWidget {
                           // Navigate to the GetOTPScreen with page set to 'register'
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const  Hospital1(page: 'register')),
+                            MaterialPageRoute(builder: (context) => const SignupScreen1  (page: 'register')),
                           );
                         },
                         child: Padding(
@@ -83,7 +85,7 @@ class WelcomeScreenB extends StatelessWidget {
                           // Navigate to the GetOTPScreen with page set to 'login'
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const Donor(page: 'login')),
+                            MaterialPageRoute(builder: (context) => const LoginScreen1(page: 'login')),
                           );
                         },
                         child: Padding(

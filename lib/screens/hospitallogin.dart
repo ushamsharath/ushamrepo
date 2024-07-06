@@ -1,36 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hemlife/screens/verification.dart';
-import 'package:hemlife/screens/verificationblood.dart';
+import 'package:hemlife/screens/Hospital.dart';
+import 'package:hemlife/screens/bloodbank.dart'; // Ensure this path is correct
 
-class SignupScreen1 extends StatefulWidget {
-  const SignupScreen1({super.key, required this.page});
-  final String page;
+class LoginScreen2 extends StatefulWidget {
+  const LoginScreen2({super.key, required String page});
 
   @override
-  _SignupScreen1State createState() => _SignupScreen1State();
+  _LoginScreen2State createState() => _LoginScreen2State();
 }
 
-class _SignupScreen1State extends State<SignupScreen1> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _mobileController = TextEditingController();
+class _LoginScreen2State extends State<LoginScreen2> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  void _signup() async {
-    String name = _nameController.text.trim();
-    String address = _addressController.text.trim();
-    String mobile = _mobileController.text.trim();
+  void _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (name.isEmpty || address.isEmpty || mobile.isEmpty || email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       _showSnackBar('Please fill all the fields', Colors.red);
       return;
     }
@@ -40,45 +31,27 @@ class _SignupScreen1State extends State<SignupScreen1> {
     });
 
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
       User? user = userCredential.user;
       if (user != null) {
-        print('User created: ${user.uid}');
-        await _firestore.collection('BloodBank').doc(user.uid).set({
-          'name': name,
-          'address': address,
-          'mobile': mobile,
-          'email': email,
-          'uid': user.uid,
-        });
+        print('User logged in: ${user.uid}');
 
-        await user.sendEmailVerification();
-        _showSnackBar('Signup Successful, please verify your email.', Colors.green);
-        print('Verification email sent to: $email');
-
-        print('Navigating to OTP verification screen'); // Debug print
-
-        // Ensure context is still valid before navigating
-        if (!mounted) return;
-
+        // Navigate to BloodBankApp after successful login
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => OTPVerificationScreenBloodBank(
-              email: email,
-              name: name,
-              // Adjust based on your requirements
-               // Adjust based on your requirements
-               address: '', mobile: '', uid: '', 
+            builder: (context) => BloodRequestApp (
+              uid: user.uid,
+              page: 'Blood Bank Request Form', bloodGroup: '',
             ),
           ),
         );
       } else {
-        print('User is null');
+        _showSnackBar('Login failed. Please check your credentials.', Colors.red);
       }
     } on FirebaseAuthException catch (e) {
       print('FirebaseAuthException: ${e.message}');
-      _showSnackBar('Signup Failed: ${e.message}', Colors.red);
+      _showSnackBar('Login Failed: ${e.message}', Colors.red);
     } catch (e) {
       print('Exception: $e');
       _showSnackBar('An error occurred: ${e.toString()}', Colors.red);
@@ -104,7 +77,7 @@ class _SignupScreen1State extends State<SignupScreen1> {
         backgroundColor: const Color.fromARGB(255, 189, 17, 5),
         title: const Center(
           child: Text(
-            'Blood Requests',
+            'Hemlife',
             style: TextStyle(
               fontFamily: 'Sansita',
               color: Colors.white,
@@ -128,54 +101,6 @@ class _SignupScreen1State extends State<SignupScreen1> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextField(
-                controller: _nameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Name of the BloodBank',
-                  labelStyle: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Sansita',
-                  ),
-                  prefixIcon: Icon(
-                    Icons.local_hospital,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _addressController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  labelStyle: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Sansita',
-                  ),
-                  prefixIcon: Icon(
-                    Icons.location_on,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _mobileController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Mobile Number',
-                  labelStyle: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Sansita',
-                  ),
-                  prefixIcon: Icon(
-                    Icons.phone,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
               TextField(
                 controller: _emailController,
                 style: const TextStyle(color: Colors.white),
@@ -223,12 +148,12 @@ class _SignupScreen1State extends State<SignupScreen1> {
               _isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                      onPressed: _signup,
+                      onPressed: _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                       ),
                       child: const Text(
-                        'Signup',
+                        'Login',
                         style: TextStyle(
                           fontFamily: 'Sansita',
                           color: Colors.blue,

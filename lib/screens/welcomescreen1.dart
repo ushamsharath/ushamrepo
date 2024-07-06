@@ -1,5 +1,6 @@
  import 'package:flutter/material.dart';
 import 'package:hemlife/screens/Hospital.dart';
+import 'package:hemlife/screens/hospitallogin.dart';
 import 'package:hemlife/screens/signin1.dart';
 import 'package:hemlife/signin.dart';
 import 'package:lottie/lottie.dart';
@@ -81,10 +82,10 @@ class WelcomeScreenH extends StatelessWidget {
                       const SizedBox(height: 40),
                       GestureDetector(
                         onTap: () {
-                          // Navigate to the GetOTPScreen with page set to 'login'
+                         
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const Donor(page: 'login')),
+                            MaterialPageRoute(builder: (context) => const LoginScreen2(page: 'login')),
                           );
                         },
                         child: Padding(

@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/flutter projects/hemlife/linux"
+    "cmake.sourceDirectory": "D:/flutter projects/hemlife/linux",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

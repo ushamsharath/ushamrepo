@@ -1,28 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const BloodRequestApp(page: '', uid: '', bloodGroup: ''));
+}
 
 class BloodRequestApp extends StatelessWidget {
-  const BloodRequestApp({super.key, required String page});
+  const BloodRequestApp({
+    super.key,
+    required this.page,
+    required this.uid,
+    required this.bloodGroup,
+  });
+
+  final String page;
+  final String uid;
+  final String bloodGroup;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hospital Blood Request Form',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-      ),
-      home: const BloodRequestForm(),
+    return const MaterialApp(
+      home: HospitalBloodRequestForm(),
     );
   }
 }
 
-class BloodRequestForm extends StatefulWidget {
-  const BloodRequestForm({super.key});
+class HospitalBloodRequestForm extends StatefulWidget {
+  const HospitalBloodRequestForm({super.key});
 
   @override
-  _BloodRequestFormState createState() => _BloodRequestFormState();
+  _HospitalBloodRequestFormState createState() => _HospitalBloodRequestFormState();
 }
 
-class _BloodRequestFormState extends State<BloodRequestForm> {
+class _HospitalBloodRequestFormState extends State<HospitalBloodRequestForm> {
   final _formKey = GlobalKey<FormState>();
 
   String hospitalName = '';
@@ -32,7 +45,7 @@ class _BloodRequestFormState extends State<BloodRequestForm> {
   String emailAddress = '';
   String bloodType = 'A+';
   String unitsOfBlood = '';
-  DateTime dateRequired = DateTime.now();
+  String dateRequired = '';
   String urgencyLevel = 'Routine';
   String patientName = '';
   String patientID = '';
@@ -70,124 +83,173 @@ class _BloodRequestFormState extends State<BloodRequestForm> {
           ),
         ),
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              // Hospital Information
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Hospital Name',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => hospitalName = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Hospital Address',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => hospitalAddress = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Contact Person',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => contactPerson = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Contact Phone Number',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => contactPhoneNumber = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Email Address',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => emailAddress = value!,
-              ),
-              const SizedBox(height: 16.0),
-              // Blood Request Details
-              DropdownButtonFormField(
-                decoration: const InputDecoration(labelText: 'Blood Type Required',labelStyle: TextStyle(color: Colors.white),),
-                value: bloodType,
-                items: bloodTypes.map((String type) {
-                  return DropdownMenuItem(value: type, child: Text(type));
-                }).toList(),
-                onChanged: (value) => setState(() => bloodType = value!),
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Units of Blood Needed',labelStyle: TextStyle(color: Colors.white),),
-                keyboardType: TextInputType.number,
-                onSaved: (value) => unitsOfBlood = value!,
-              ),
-              ListTile(
-                title: Text("Date Required: ${dateRequired.toLocal()}".split(' ')[0]),
-
-               
-                trailing: const Icon(Icons.calendar_today,color: Colors.white,),
-                
-                onTap: _selectDate,
-              ),
-              DropdownButtonFormField(
-                decoration: const InputDecoration(labelText: 'Urgency Level',labelStyle: TextStyle(color: Colors.white),),
-                value: urgencyLevel,
-                items: urgencyLevels.map((String level) {
-                  return DropdownMenuItem(value: level, child: Text(level));
-                }).toList(),
-                onChanged: (value) => setState(() => urgencyLevel = value!),
-              ),
-              const SizedBox(height: 16.0),
-              // Patient Information
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Patient Name',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => patientName = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Patient ID (if any)',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => patientID = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Diagnosis/Reason for Blood Request',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => diagnosis = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Comments/Additional Notes',labelStyle: TextStyle(color: Colors.white),),
-                onSaved: (value) => comments = value!,
-              ),
-              const SizedBox(height: 16.0),
-              // Submit Button
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Submit Request',),
-              ),
-            ],
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                _buildTextFormField('Hospital Name', (value) => hospitalName = value!),
+                _buildTextFormField('Hospital Address', (value) => hospitalAddress = value!),
+                _buildTextFormField('Contact Person', (value) => contactPerson = value!),
+                _buildTextFormField('Contact Phone Number', (value) => contactPhoneNumber = value!, keyboardType: TextInputType.phone),
+                _buildTextFormField('Email Address', (value) => emailAddress = value!, keyboardType: TextInputType.emailAddress),
+                const SizedBox(height: 16.0),
+                _buildDropdownFormField('Blood Type Required', bloodTypes, bloodType, (value) => setState(() => bloodType = value!)),
+                _buildTextFormField('Units of Blood Needed', (value) => unitsOfBlood = value!, keyboardType: TextInputType.number),
+                _buildTextFormField('Date Required', (value) => dateRequired = value!),
+                _buildDropdownFormField('Urgency Level', urgencyLevels, urgencyLevel, (value) => setState(() => urgencyLevel = value!)),
+                const SizedBox(height: 16.0),
+                _buildTextFormField('Patient Name', (value) => patientName = value!),
+                _buildTextFormField('Patient ID', (value) => patientID = value!),
+                _buildTextFormField('Diagnosis', (value) => diagnosis = value!),
+                _buildTextFormField('Additional Comments', (value) => comments = value!),
+                const SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+                      _submitForm();
+                    }
+                  },
+                  child: const Text('Submit Request'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: dateRequired,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+  Widget _buildTextFormField(String labelText, Function(String?) onSaved, {TextInputType keyboardType = TextInputType.text}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: const TextStyle(
+            color: Colors.white,
+            fontFamily: 'Sansita',
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white),
+          ),
+        ),
+        style: const TextStyle(color: Colors.white),
+        validator: (value) {
+          if (value!.isEmpty) {
+            return 'This field cannot be empty';
+          }
+          return null;
+        },
+        keyboardType: keyboardType,
+        onSaved: onSaved,
+      ),
     );
-    if (picked != null && picked != dateRequired) {
-      setState(() {
-        dateRequired = picked;
-      });
-    }
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      // Process the submitted data
-      print('Hospital Name: $hospitalName');
-      print('Hospital Address: $hospitalAddress');
-      print('Contact Person: $contactPerson');
-      print('Contact Phone Number: $contactPhoneNumber');
-      print('Email Address: $emailAddress');
-      print('Blood Type Required: $bloodType');
-      print('Units of Blood Needed: $unitsOfBlood');
-      print('Date Required: $dateRequired');
-      print('Urgency Level: $urgencyLevel');
-      print('Patient Name: $patientName');
-      print('Patient ID: $patientID');
-      print('Diagnosis/Reason for Blood Request: $diagnosis');
-      print('Comments/Additional Notes: $comments');
+  Widget _buildDropdownFormField(String labelText, List<String> items, String value, Function(String?) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: const TextStyle(
+            color: Colors.white,
+            fontFamily: 'Sansita',
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white),
+          ),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: value,
+            icon: const Icon(Icons.arrow_downward, color: Colors.white),
+            iconSize: 24,
+            elevation: 16,
+            style: const TextStyle(color: Colors.white),
+            dropdownColor: Colors.blue, // Change dropdown background color
+            onChanged: onChanged,
+            items: items.map((String item) {
+              return DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _submitForm() async {
+    final requestData = {
+      'hospitalName': hospitalName,
+      'hospitalAddress': hospitalAddress,
+      'contactPerson': contactPerson,
+      'contactPhoneNumber': contactPhoneNumber,
+      'emailAddress': emailAddress,
+      'bloodType': bloodType,
+      'unitsOfBlood': unitsOfBlood,
+      'dateRequired': dateRequired,
+      'urgencyLevel': urgencyLevel,
+      'patientName': patientName,
+      'patientID': patientID,
+      'diagnosis': diagnosis,
+      'comments': comments,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    try {
+      // Log requestData to debug console
+      print('Submitting request with data: $requestData');
+
+      // Add document to Firestore
+      await FirebaseFirestore.instance.collection('hospitalBloodRequests').add(requestData);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hospital blood request submitted'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // Clear form fields after successful submission
+      _formKey.currentState!.reset();
+      setState(() {
+        hospitalName = '';
+        hospitalAddress = '';
+        contactPerson = '';
+        contactPhoneNumber = '';
+        emailAddress = '';
+        bloodType = 'A+';
+        unitsOfBlood = '';
+        dateRequired = '';
+        urgencyLevel = 'Routine';
+        patientName = '';
+        patientID = '';
+        diagnosis = '';
+        comments = '';
+      });
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to submit request: $e'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Log the error for debugging
+      print('Error submitting request: $e');
     }
   }
 }
